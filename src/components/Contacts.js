@@ -22,7 +22,7 @@ const Contacts = () => {
         <h2 className="text-5xl font-primary font-extrabold mb-4">
           Contact Us
         </h2>
-        <p className="max-w-[540px] mx-auto px-6 lg:px-0 mb-[64px] font-primary">
+        <p className="max-w-[540px] mx-auto px-6 lg:px-0 mb-[64px] font-normal">
           We’re here to assist you with any questions or concerns you may have. Whether you need legal advice, want to schedule a consultation, or have general inquiries, our team is ready to help. Reach out to us through the form below, by phone, or via email, and we will get back to you promptly. Your satisfaction and peace of mind are our top priorities.
         </p>
         <form
@@ -39,10 +39,10 @@ const Contacts = () => {
         {successMessage && (
           <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50'>
             <div className='bg-white p-8 rounded shadow-lg text-center'>
-              <p>Message successfully sent.</p>
+              <p className="text-black">Submitted Successfully</p>             
               <button
                 onClick={handleCloseMessage}
-                className='mt-4 px-4 py-2 bg-blue-500 text-white rounded'
+                className='mt-4 px-4 py-2 bg-amber-400 text-white rounded'
               >
                 Close
               </button>

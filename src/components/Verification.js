@@ -86,7 +86,7 @@ const Verification = () => {
         </div>
       )}
       <div className="bg-yellow-300 w-full p-8 rounded-sm max-w-lg mx-auto shadow-lg">
-        <h3 className="text-gray-700 text-2xl font-bold mb-6">Verification Form</h3>
+        <h3 className="text-gray-700 text-2xl font-bold mb-2">Verification Form</h3>
         <p>Please fill the form accurately, as information provided will be used in identity card and also in your personal form.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
@@ -113,7 +113,7 @@ const Verification = () => {
           <input
             className="form-control w-full p-4 rounded-sm border border-gray-300 focus:ring-2 focus:ring-zinc-800"
             placeholder="Phone Number"
-            type="tel"
+            type="number"
             name="phoneNumber"
             onChange={handleChange}
           />

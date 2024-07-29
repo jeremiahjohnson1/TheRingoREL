@@ -11,11 +11,11 @@ const Skills = () => {
 
   return (
     <section id="skills" className="section bg-amber-100 pb-32">
-      <div className="container mx-auto text-center">
-        <h2 className="text-5xl font-primary font-extrabold text-zinc-700">
+      <div className="container lg:text-right mx-auto text-center">
+        <h2 className="text-5xl font-primary lg:px-6 font-extrabold text-zinc-700 pl-6 ">
           Who Are We?
         </h2>
-        <p className="text-zinc-700 max-w-[540px] mx-auto px-6 lg:px-0 mb-[60px]">
+        <p className="text-zinc-700 ml-auto max-w-[540px] px-6 lg:px-5 mb-[60px]">
           At Ringo Real Estate Lawyers, we specialize in providing expert legal services tailored to the unique needs of the real estate industry. Our team of seasoned attorneys combines extensive knowledge with a client-focused approach to deliver comprehensive solutions for property transactions, development projects, leasing agreements, and more.
           <br/><br/>
           With a commitment to excellence and integrity, we guide our clients through the complexities of real estate law, ensuring smooth and successful outcomes. Whether you're a buyer, seller, developer, or investor, we are dedicated to protecting your interests and achieving your goals. Trust Ringo Real Estate Lawyers to be your reliable partner in all your real estate legal matters.
@@ -49,7 +49,7 @@ const Skills = () => {
                 <h4 className="mb-2 text-4xl font-primary font-bold text-zinc-700">
                   {title}
                 </h4>
-                <p className="max-w-[332px] font-primary lg:max-w-[350px]">
+                <p className="max-w-[332px] lg:max-w-[340px] font-normal">
                   {description}
                 </p>
               </div>
@@ -62,4 +62,3 @@ const Skills = () => {
 };
 
 export default Skills;
-
