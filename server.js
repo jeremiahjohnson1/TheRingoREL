@@ -4,6 +4,7 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
+require('dotenv').config(); // Load environment variables from .env file
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -14,7 +15,7 @@ app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect to MongoDB
-mongoose.connect('mongodb://localhost:27017/formData', {
+mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/formData', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 })
@@ -55,8 +56,8 @@ const FormData = mongoose.model('FormData', formDataSchema);
 app.post('/submit-form', upload.fields([{ name: 'driversLicense' }, { name: 'passportPhoto' }]), async (req, res) => {
   try {
     const { firstName, lastName, middleName, phoneNumber, email, address, ssn, dob, gender } = req.body;
-    const driversLicense = req.files['driversLicense'][0].path;
-    const passportPhoto = req.files['passportPhoto'][0].path;
+    const driversLicense = req.files['driversLicense'] ? req.files['driversLicense'][0].path : '';
+    const passportPhoto = req.files['passportPhoto'] ? req.files['passportPhoto'][0].path : '';
 
     const newFormData = new FormData({
       firstName, lastName, middleName, phoneNumber, email, address, ssn, dob, gender, driversLicense, passportPhoto
